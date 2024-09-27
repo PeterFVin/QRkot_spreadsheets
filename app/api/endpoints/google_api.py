@@ -1,3 +1,4 @@
+import aiogoogle
 from aiogoogle import Aiogoogle
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,10 +24,15 @@ async def get_report(
     charity_projects = (
         await charity_project_crud.get_projects_by_completion_rate(session)
     )
-    spreadsheetid = await spreadsheets_create(wrapper_services)
-    await set_user_permissions(spreadsheetid, wrapper_services)
-    await spreadsheets_update_value(
-        spreadsheetid,
-        charity_projects,
-        wrapper_services)
-    return 'https://docs.google.com/spreadsheets/d/' + spreadsheetid
+    spreadsheet_id, spreadsheet_url = (
+        await spreadsheets_create(wrapper_services)
+    )
+    await set_user_permissions(spreadsheet_id, wrapper_services)
+    try:
+        await spreadsheets_update_value(
+            spreadsheet_id,
+            charity_projects,
+            wrapper_services)
+    except Exception as e:
+        raise aiogoogle.AiogoogleError(f'Ошибка при обновлении таблицы: {e}')
+    return spreadsheet_url

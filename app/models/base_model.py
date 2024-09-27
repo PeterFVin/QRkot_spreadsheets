@@ -20,8 +20,14 @@ class BaseTranscationModel(Base):
     close_date = Column(DateTime)
 
     __table_args__ = (
-        CheckConstraint('invested_amount >= 0',
-                        name='invested_ge_zero'),
-        CheckConstraint('invested_amount <= full_amount',
-                        name='invested_le_full_amount'),
+        CheckConstraint('0 <= invested_amount <= full_amount',
+                        name='invested_ge_zero_le_full_amount'),
     )
+
+    def __repr__(self):
+        return (
+            f'создан {self.create_date}, общая сумма {self.full_amount}, '
+            f'внесено {self.invested_amount}, ' +
+            (('закрыт ' + self.close_date) if self.fully_invested
+             else 'не закрыт')
+        )
