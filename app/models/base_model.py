@@ -27,7 +27,6 @@ class BaseTranscationModel(Base):
     def __repr__(self):
         return (
             f'создан {self.create_date}, общая сумма {self.full_amount}, '
-            f'внесено {self.invested_amount}, ' +
-            (('закрыт ' + self.close_date) if self.fully_invested
-             else 'не закрыт')
+            f'внесено {self.invested_amount}, '
+            f'{self.close_date}'
         )

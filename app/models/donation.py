@@ -9,4 +9,5 @@ class Donation(BaseTranscationModel):
 
     def __repr__(self):
         base_repr = super().__repr__()
-        return (f'Пожертвование, {base_repr}')
+        return (f'Пожертвование от пользователя {self.user_id}, '
+                f'{self.comment} {base_repr}')
