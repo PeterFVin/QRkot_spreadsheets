@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime
 
 from aiogoogle import Aiogoogle
@@ -10,7 +11,7 @@ COLUMNS = 11
 TITLE = 'Отчет от {}'
 SPREADSHEET_BODY = dict(
     properties=dict(
-        title=TITLE.format(datetime.now().strftime(FORMAT)),
+        title='',
         locale='ru_RU',
     ),
     sheets=[dict(properties=dict(
@@ -21,8 +22,8 @@ SPREADSHEET_BODY = dict(
             rowCount=ROWS,
             columnCount=COLUMNS,
         )))])
-TABLE_VALUES_CONST = [
-    ['Отчет от', datetime.now().strftime(FORMAT)],
+TABLE_HEAD = [
+    ['Отчет от', ''],
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание']
 ]
@@ -30,6 +31,10 @@ TABLE_VALUES_CONST = [
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     service = await wrapper_services.discover('sheets', 'v4')
+    spreadsheet_body = deepcopy(SPREADSHEET_BODY)
+    spreadsheet_body['properties']['title'] = TITLE.format(
+        datetime.now().strftime(FORMAT)
+    )
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=SPREADSHEET_BODY)
     )
@@ -58,8 +63,10 @@ async def spreadsheets_update_value(
         wrapper_services: Aiogoogle
 ) -> None:
     service = await wrapper_services.discover('sheets', 'v4')
+    table_head = deepcopy(TABLE_HEAD)
+    table_head[0][1] = datetime.now().strftime(FORMAT)
     table_values = [
-        *TABLE_VALUES_CONST,
+        *table_head,
         *[list(map(str, [
             charity_project.name,
             charity_project.close_date - charity_project.create_date,
